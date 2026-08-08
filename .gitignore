@@ -1,0 +1,27 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+
+# Data & artifacts (regenerate via scripts, don't commit)
+data/machine_sensors.csv
+data/processed/
+models/*
+!models/.gitkeep
+monitoring_reports/
+predictions.csv
+mlruns/
+
+# Tooling
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.log
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/

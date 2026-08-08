@@ -1,0 +1,75 @@
+[project]
+name = "pm-mlops"
+version = "0.1.0"
+description = "End-to-end, modular MLOps pipeline for industrial predictive maintenance (machine failure prediction from sensor telemetry)"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = [
+    "pandas>=2.1",
+    "numpy>=1.26",
+    "scikit-learn>=1.4",
+    "pydantic>=2.6",
+    "pyyaml>=6.0",
+    "joblib>=1.3",
+    "loguru>=0.7",
+]
+
+[project.optional-dependencies]
+serving = [
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.29",
+]
+tracking = [
+    "mlflow>=2.11",
+]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=4.1",
+    "ruff>=0.4",
+    "pre-commit>=3.7",
+    "httpx>=0.27",
+]
+security = [
+    # SAST: static analysis for security anti-patterns (hardcoded secrets,
+    # unsafe deserialization, shell injection, weak crypto, ...)
+    "bandit[toml]>=1.7.9",
+    # SCA: flags dependencies with known published CVEs (queries the OSV /
+    # PyPI advisory database against the resolved dependency set)
+    "pip-audit>=2.7",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pm_mlops"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+# E/F/I/UP/B/SIM: standard correctness+style rules.
+# S: flake8-bandit rules ported into ruff — fast, in-the-editor SAST signal
+# that complements the deeper `bandit` scan run separately in CI (see
+# `make sast` / .github/workflows/security.yml).
+select = ["E", "F", "I", "UP", "B", "SIM", "S"]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests legitimately use `assert` (S101) and construct fixture data that
+# looks like, but is not, a hardcoded credential (S105/S106).
+"tests/*" = ["S101", "S105", "S106"]
+# Intentional bind-all-interfaces default for a containerized API (see the
+# inline `# nosec B104` comment at the definition site for the rationale).
+"src/pm_mlops/config.py" = ["S104"]
+
+[tool.bandit]
+exclude_dirs = ["tests", ".venv", "venv"]
+# B101 (assert-used) is expected/fine in test code; excluded via exclude_dirs
+# above rather than skipped globally, so production code is still checked.
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --cov=src/pm_mlops --cov-report=term-missing"

@@ -1,0 +1,60 @@
+# ---------------------------------------------------------------------------
+# Central configuration for the Predictive Maintenance MLOps pipeline.
+# Every script and module reads its settings from here via
+# pm_mlops.config.ProjectConfig.from_yaml(), so behaviour can be changed
+# without touching code. Feature/target schema mirrors the widely-used
+# AI4I 2020 industrial predictive-maintenance dataset (UCI).
+# ---------------------------------------------------------------------------
+
+project_name: pm-mlops
+random_seed: 42
+
+data:
+  raw_path: data/machine_sensors.csv
+  processed_dir: data/processed
+  train_path: data/processed/train.csv
+  test_path: data/processed/test.csv
+  test_size: 0.2
+  validation_size: 0.15  # carved out of the *train* split, used only for threshold tuning
+
+target:
+  column: machine_failure
+  positive_label: 1
+
+features:
+  numerical:
+    - air_temperature_k
+    - process_temperature_k
+    - rotational_speed_rpm
+    - torque_nm
+    - tool_wear_min
+  categorical:
+    - product_type
+
+model:
+  artifact_dir: models
+  artifact_name: failure_classifier.joblib
+  type: random_forest
+  params:
+    n_estimators: 300
+    max_depth: 8
+    min_samples_leaf: 2
+    class_weight: balanced
+  threshold_tuning:
+    enabled: true
+    false_negative_cost: 10.0  # missing a real failure is assumed 10x costlier...
+    false_positive_cost: 1.0   # ...than flagging a machine that turns out fine
+    search_steps: 99
+
+mlflow:
+  enabled: false
+  experiment_name: /pm-mlops/failure-classifier
+  tracking_uri: null
+
+serving:
+  host: 0.0.0.0
+  port: 8000
+
+monitoring:
+  report_dir: monitoring_reports
+  drift_threshold: 0.1

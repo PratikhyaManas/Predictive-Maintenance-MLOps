@@ -1,0 +1,95 @@
+name: Security
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Weekly scheduled scan catches newly-disclosed CVEs in pinned
+    # dependencies even when no code changes, since `push`/`pull_request`
+    # triggers alone would miss those.
+    - cron: "0 6 * * 1"
+
+jobs:
+  sast:
+    name: SAST (bandit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install security tooling
+        run: uv sync --extra security
+
+      - name: Run bandit
+        run: uv run bandit -c pyproject.toml -r src/ scripts/ -f json -o bandit-report.json
+        continue-on-error: true
+
+      - name: Show bandit results
+        run: uv run bandit -c pyproject.toml -r src/ scripts/
+
+      - name: Upload bandit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bandit-report
+          path: bandit-report.json
+
+  sca:
+    name: SCA (pip-audit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install project + security tooling
+        run: uv sync --extra dev --extra serving --extra tracking --extra security
+
+      - name: Run pip-audit
+        run: uv run pip-audit --desc --strict
+
+  docker-scan:
+    name: Container image scan (Trivy)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync --extra dev
+
+      - name: Generate sample data and train a model
+        # The Dockerfile bundles a trained artifact; build one so the image
+        # being scanned matches what would actually ship.
+        run: |
+          uv run python scripts/00_generate_sample_data.py
+          uv run python scripts/01_process_data.py
+          uv run python scripts/02_train_model.py
+
+      - name: Build image
+        run: docker build -t pm-mlops:scan .
+
+      - name: Scan image with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: pm-mlops:scan
+          format: table
+          exit-code: "1"
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
