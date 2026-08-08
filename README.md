@@ -71,6 +71,39 @@ predictive-maintenance-mlops/
 └── Makefile
 ```
 
+## Architecture diagram
+
+```mermaid
+flowchart LR
+  A[Raw Sensor Data CSV\ndata/machine_sensors.csv]
+  B[scripts/00_generate_sample_data.py\nSynthetic data generation]
+  C[src/pm_mlops/data_processor.py\nClean, validate, stratified split]
+  D[data/processed/train.csv\ndata/processed/test.csv]
+
+  E[scripts/02_train_model.py\nTraining pipeline]
+  F[src/pm_mlops/models/classifier.py\nFailureClassifier + preprocessing]
+  G[models/model.pkl\nModel artifact + threshold metadata]
+
+  H[scripts/03_evaluate_model.py\nOffline evaluation]
+  I[Metrics\nPrecision/Recall/F1/ROC-AUC]
+
+  J[scripts/05_refresh_monitor.py]
+  K[src/pm_mlops/monitoring/drift.py\nDrift report PSI/TVD]
+
+  L[src/pm_mlops/serving/api.py\nFastAPI service]
+  M[/predict and /predict/batch\nInference responses]
+  N[/metrics\nServing counters]
+
+  B --> A
+  A --> C --> D
+  D --> E --> F --> G
+  G --> H --> I
+  D --> J --> K
+  G --> L
+  L --> M
+  L --> N
+```
+
 ## The problem being modeled
 
 Each row is one sensor reading off a machine. `machine_failure` is 1 if
