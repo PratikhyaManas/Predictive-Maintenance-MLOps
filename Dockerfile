@@ -5,7 +5,7 @@
 # reduce supply-chain drift; for production, pin further to an immutable
 # digest (`python:3.12.5-slim@sha256:...`) and let Dependabot (see
 # .github/dependabot.yml) open a PR whenever a new patch is released.
-FROM python:3.12.5-slim AS builder
+FROM python:3.14.0-slim AS builder
 
 RUN pip install --no-cache-dir "uv==0.4.*"
 
@@ -19,7 +19,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 RUN uv pip install --python /opt/venv/bin/python ".[serving]"
 
 # --- Runtime stage: slim image, no build toolchain ---
-FROM python:3.12.5-slim AS runtime
+FROM python:3.14.0-slim AS runtime
 
 # Security patches for OS packages present in the base image (defense in
 # depth alongside the Trivy image scan in CI, which flags anything this
