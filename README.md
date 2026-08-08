@@ -91,8 +91,8 @@ flowchart LR
   K[src/pm_mlops/monitoring/drift.py\nDrift report PSI/TVD]
 
   L[src/pm_mlops/serving/api.py\nFastAPI service]
-  M[/predict and /predict/batch\nInference responses]
-  N[/metrics\nServing counters]
+  M["/predict and /predict/batch<br/>Inference responses"]
+  N["/metrics<br/>Serving counters"]
 
   B --> A
   A --> C --> D
