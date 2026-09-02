@@ -18,13 +18,12 @@ Usage
 
 from __future__ import annotations
 
-import sys
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+from _bootstrap import DEFAULT_CONFIG_PATH
 
 from pm_mlops.config import ProjectConfig  # noqa: E402
 from pm_mlops.utils import get_logger  # noqa: E402
@@ -99,7 +98,7 @@ def generate_sensor_dataset(n_rows: int = 5000, seed: int = 42) -> pd.DataFrame:
 
 
 def main() -> None:
-    config = ProjectConfig.from_yaml(Path(__file__).resolve().parents[1] / "project_config.yml")
+    config = ProjectConfig.from_yaml(DEFAULT_CONFIG_PATH)
     df = generate_sensor_dataset()
 
     out_path = Path(config.data.raw_path)

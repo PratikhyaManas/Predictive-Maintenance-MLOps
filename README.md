@@ -36,7 +36,7 @@ the rest of the pipeline needs no changes.
 | Concrete model | `src/pm_mlops/models/classifier.py` | Preprocessing + estimator saved as one artifact |
 | Drift monitoring | `src/pm_mlops/monitoring/drift.py` | Lightweight PSI/TVD checks — catches sensor miscalibration or regime change, zero extra infra |
 | REST serving | `src/pm_mlops/serving/api.py` | FastAPI app, loads the same artifact scripts produce, returns a risk tier |
-| Orchestration | `scripts/0N_*.py` | Thin, numbered, CLI-runnable pipeline stages |
+| Orchestration | `scripts/0N_*.py`, `scripts/_bootstrap.py` | Thin, numbered CLI stages with shared bootstrap helpers for consistent config/path setup |
 | Tests | `tests/` | One test module per package module |
 
 ## Project layout
@@ -47,6 +47,7 @@ predictive-maintenance-mlops/
 ├── data/                          # raw & processed data (gitignored, regenerate locally)
 ├── notebooks/                     # exploratory analysis
 ├── scripts/
+│   ├── _bootstrap.py              # shared script bootstrap (src path + default config path)
 │   ├── 00_generate_sample_data.py # synthetic sensor-fleet generator (swap for real data)
 │   ├── 01_process_data.py         # clean + split
 │   ├── 02_train_model.py          # train + evaluate + save (+ optional MLflow logging)

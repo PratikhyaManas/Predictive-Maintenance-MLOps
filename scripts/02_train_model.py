@@ -13,12 +13,11 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import sys
 from pathlib import Path
 
 import pandas as pd
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+from _bootstrap import DEFAULT_CONFIG_PATH
 
 from pm_mlops.config import ProjectConfig  # noqa: E402
 from pm_mlops.data_processor import DataProcessor  # noqa: E402
@@ -26,7 +25,6 @@ from pm_mlops.models import FailureClassifier  # noqa: E402
 from pm_mlops.utils import get_logger  # noqa: E402
 
 logger = get_logger(__name__)
-DEFAULT_CONFIG = Path(__file__).resolve().parents[1] / "project_config.yml"
 
 
 def _maybe_log_to_mlflow(config: ProjectConfig, metrics: dict, model_path: Path) -> None:
@@ -52,7 +50,7 @@ def _maybe_log_to_mlflow(config: ProjectConfig, metrics: dict, model_path: Path)
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--config", type=str, default=str(DEFAULT_CONFIG))
+    parser.add_argument("--config", type=str, default=str(DEFAULT_CONFIG_PATH))
     args = parser.parse_args()
 
     config = ProjectConfig.from_yaml(args.config)
@@ -74,15 +72,10 @@ def main() -> None:
         tuning_result = model.tune_threshold(x_val, y_val)
         logger.info(f"Threshold tuning result: {tuning_result}")
 
-        # Refit on the *full* training split (sub_train + validation) for
-        # the final artifact — more data for the model to learn from, while
-        # the tuned threshold (stored in metadata, untouched by train())
-        # carries over unchanged.
-        x_train, y_train = processor.get_features_and_target(train_df)
-        model.train(x_train, y_train)
-    else:
-        x_train, y_train = processor.get_features_and_target(train_df)
-        model.train(x_train, y_train)
+    # Final fit always uses the full training split; if threshold tuning ran,
+    # the tuned threshold in metadata carries over unchanged.
+    x_train, y_train = processor.get_features_and_target(train_df)
+    model.train(x_train, y_train)
 
     x_test, y_test = processor.get_features_and_target(test_df)
     metrics = model.evaluate(x_test, y_test)

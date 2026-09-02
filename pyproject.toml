@@ -28,7 +28,7 @@ dev = [
     "pytest-cov>=4.1",
     "ruff>=0.4",
     "pre-commit>=3.7",
-    "httpx>=0.27",
+    "httpx2>=0.0.0",
 ]
 security = [
     # SAST: static analysis for security anti-patterns (hardcoded secrets,

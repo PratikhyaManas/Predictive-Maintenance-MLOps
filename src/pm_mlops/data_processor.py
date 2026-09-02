@@ -42,6 +42,16 @@ class DataProcessor:
         self.config = config
         self.df: pd.DataFrame | None = None
 
+    def _resolve_df(self, df: pd.DataFrame | None, *, context: str) -> pd.DataFrame:
+        """Return an explicit dataframe or the processor-held one, with a clear error."""
+        resolved = df if df is not None else self.df
+        if resolved is None:
+            raise ValueError(
+                f"No dataframe available for {context}. "
+                "Pass `df=` explicitly or call `load_data()` first."
+            )
+        return resolved
+
     # ------------------------------------------------------------------ #
     # Loading & cleaning
     # ------------------------------------------------------------------ #
@@ -61,7 +71,7 @@ class DataProcessor:
 
     def clean_data(self, df: pd.DataFrame | None = None) -> pd.DataFrame:
         """Clean sensor telemetry: dedupe, coerce types, clip out-of-range readings."""
-        df = (df if df is not None else self.df).copy()
+        df = self._resolve_df(df, context="cleaning").copy()
 
         before = len(df)
         df = df.drop_duplicates()
@@ -100,6 +110,18 @@ class DataProcessor:
     # ------------------------------------------------------------------ #
     # Splitting
     # ------------------------------------------------------------------ #
+    def _stratified_split(
+        self, df: pd.DataFrame, test_size: float
+    ) -> tuple[pd.DataFrame, pd.DataFrame]:
+        """Shared stratified split helper used for test/validation slicing."""
+        target = self.config.target.column
+        return train_test_split(
+            df,
+            test_size=test_size,
+            random_state=self.config.random_seed,
+            stratify=df[target],
+        )
+
     def split_data(
         self, df: pd.DataFrame | None = None
     ) -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -109,14 +131,8 @@ class DataProcessor:
         are rare events (typically a few percent of readings); a random
         split without stratification risks a test set with zero failures.
         """
-        df = df if df is not None else self.df
-        target = self.config.target.column
-        train_df, test_df = train_test_split(
-            df,
-            test_size=self.config.data.test_size,
-            random_state=self.config.random_seed,
-            stratify=df[target],
-        )
+        df = self._resolve_df(df, context="splitting")
+        train_df, test_df = self._stratified_split(df, self.config.data.test_size)
         logger.info(f"Split into train={len(train_df)} rows, test={len(test_df)} rows")
         return train_df, test_df
 
@@ -139,12 +155,8 @@ class DataProcessor:
         the threshold is never tuned against the data used for final
         reported metrics.
         """
-        target = self.config.target.column
-        sub_train_df, val_df = train_test_split(
-            train_df,
-            test_size=self.config.data.validation_size,
-            random_state=self.config.random_seed,
-            stratify=train_df[target],
+        sub_train_df, val_df = self._stratified_split(
+            train_df, self.config.data.validation_size
         )
         logger.info(
             f"Split training data into sub_train={len(sub_train_df)} rows, "
