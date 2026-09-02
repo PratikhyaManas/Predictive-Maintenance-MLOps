@@ -16,7 +16,6 @@ import argparse
 from pathlib import Path
 
 import pandas as pd
-
 from _bootstrap import DEFAULT_CONFIG_PATH
 
 from pm_mlops.config import ProjectConfig  # noqa: E402

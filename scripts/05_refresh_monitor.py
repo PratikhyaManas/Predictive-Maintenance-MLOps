@@ -13,7 +13,6 @@ from __future__ import annotations
 import argparse
 
 import pandas as pd
-
 from _bootstrap import DEFAULT_CONFIG_PATH
 
 from pm_mlops.config import ProjectConfig  # noqa: E402
