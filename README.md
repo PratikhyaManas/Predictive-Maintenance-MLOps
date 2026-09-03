@@ -72,38 +72,20 @@ predictive-maintenance-mlops/
 └── Makefile
 ```
 
-## Architecture diagram
+## Architecture overview
 
-```mermaid
-flowchart LR
-  A[Raw Sensor Data CSV\ndata/machine_sensors.csv]
-  B[scripts/00_generate_sample_data.py\nSynthetic data generation]
-  C[src/pm_mlops/data_processor.py\nClean, validate, stratified split]
-  D[data/processed/train.csv\ndata/processed/test.csv]
+This end-to-end MLOps workflow turns machine telemetry into a monitored
+predictive maintenance decision system: raw sensor data is cleaned and
+stratified, a failure model is trained and evaluated, and the serving layer
+exposes inference plus live operational monitoring.
 
-  E[scripts/02_train_model.py\nTraining pipeline]
-  F[src/pm_mlops/models/classifier.py\nFailureClassifier + preprocessing]
-  G[models/model.pkl\nModel artifact + threshold metadata]
+<p align="center">
+  <img src="assets/architecture.svg" alt="Predictive maintenance MLOps architecture" width="1200" />
+</p>
 
-  H[scripts/03_evaluate_model.py\nOffline evaluation]
-  I[Metrics\nPrecision/Recall/F1/ROC-AUC]
-
-  J[scripts/05_refresh_monitor.py]
-  K[src/pm_mlops/monitoring/drift.py\nDrift report PSI/TVD]
-
-  L[src/pm_mlops/serving/api.py\nFastAPI service]
-  M["/predict and /predict/batch<br/>Inference responses"]
-  N["/metrics<br/>Serving counters"]
-
-  B --> A
-  A --> C --> D
-  D --> E --> F --> G
-  G --> H --> I
-  D --> J --> K
-  G --> L
-  L --> M
-  L --> N
-```
+The pipeline combines data ingestion, preprocessing, training, evaluation,
+serving, and drift monitoring in a single operational loop so models can be
+retrained and monitored without changing the underlying production workflow.
 
 ## The problem being modeled
 
