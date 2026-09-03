@@ -79,9 +79,7 @@ predictive maintenance decision system: raw sensor data is cleaned and
 stratified, a failure model is trained and evaluated, and the serving layer
 exposes inference plus live operational monitoring.
 
-<p align="center">
-  <img src="assets/architecture.svg" alt="Predictive maintenance MLOps architecture" width="1200" />
-</p>
+![Predictive maintenance MLOps architecture](assets/architecture.svg)
 
 The pipeline combines data ingestion, preprocessing, training, evaluation,
 serving, and drift monitoring in a single operational loop so models can be
