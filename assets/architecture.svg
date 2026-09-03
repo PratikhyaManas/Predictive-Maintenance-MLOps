@@ -115,7 +115,7 @@
   <g filter="url(#shadow)">
     <rect x="1160" y="160" width="360" height="300" rx="26" class="successCard"/>
     <rect x="1185" y="180" width="205" height="52" rx="16" fill="#DCFCE7"/>
-    <text x="1218" y="214" class="section">3. Model & Evaluation</text>
+    <text x="1218" y="214" class="section">3. Model &amp; Evaluation</text>
     <g transform="translate(1215 260)">
       <rect x="0" y="0" width="150" height="140" rx="20" fill="#FFFFFF" stroke="#A7F3D0"/>
       <path d="M39 47L75 28L111 47V83L75 102L39 83V47Z" fill="#ECFDF5" stroke="#10B981" stroke-width="3"/>
