@@ -1,3 +1,16 @@
+<p align="center">
+  <img src="assets/banner.svg" alt="Predictive Maintenance MLOps banner" width="100%" />
+</p>
+
+<p align="center">
+  <img alt="CI" src="https://github.com/PratikhyaManas/Predictive-Maintenance-MLOps/actions/workflows/ci.yml/badge.svg" />
+  <img alt="Security" src="https://github.com/PratikhyaManas/Predictive-Maintenance-MLOps/actions/workflows/security.yml/badge.svg" />
+  <img alt="Python" src="https://img.shields.io/badge/python-3.10%2B-blue" />
+  <img alt="License" src="https://img.shields.io/badge/license-MIT-green" />
+  <img alt="Lint" src="https://img.shields.io/badge/lint-ruff-orange" />
+  <img alt="Package manager" src="https://img.shields.io/badge/deps-uv-6E56CF" />
+</p>
+
 # pm-mlops — Industrial Predictive Maintenance
 
 A complete, modular end-to-end MLOps pipeline that predicts **machine
@@ -10,6 +23,22 @@ The feature/target schema mirrors the widely-used **AI4I 2020 Predictive
 Maintenance** dataset (UCI), a standard reference for industrial ML —
 swap the synthetic data generator for a real historian/SCADA export and
 the rest of the pipeline needs no changes.
+
+## 📚 Table of contents
+
+- [What's optimized here (and why)](#whats-optimized-here-and-why)
+- [Why this structure](#why-this-structure)
+- [Project layout](#project-layout)
+- [Architecture overview](#architecture-overview)
+- [The problem being modeled](#the-problem-being-modeled)
+- [Quickstart](#quickstart)
+- [Serving predictions](#serving-predictions)
+- [Running in Docker](#running-in-docker)
+- [Batch predictions](#batch-predictions)
+- [Testing & linting](#testing--linting)
+- [Security](#security)
+- [Swapping in real sensor data](#swapping-in-real-sensor-data)
+- [Extending](#extending)
 
 ## What's optimized here (and why)
 
@@ -78,6 +107,25 @@ This end-to-end MLOps workflow turns machine telemetry into a monitored
 predictive maintenance decision system: raw sensor data is cleaned and
 stratified, a failure model is trained and evaluated, and the serving layer
 exposes inference plus live operational monitoring.
+
+```mermaid
+flowchart LR
+    A[("📡 Sensor data<br/>machine_sensors.csv")] --> B["🧹 DataProcessor<br/>clean · clip · stratified split"]
+    B --> C["🧠 FailureClassifier<br/>train + cost-aware threshold"]
+    C --> D[("💾 Model artifact<br/>models/*.joblib")]
+    D --> E["🌐 FastAPI serving<br/>/predict · /predict/batch"]
+    D --> F["📊 DriftMonitor<br/>PSI / TVD checks"]
+    E --> G{"🚨 Risk tier"}
+    F --> H["📁 monitoring_reports/*.json"]
+
+    style A fill:#EEF6FF,stroke:#BFDBFE
+    style D fill:#ECFDF5,stroke:#A7F3D0
+    style E fill:#EEF6FF,stroke:#BFDBFE
+    style F fill:#ECFDF5,stroke:#A7F3D0
+    style G fill:#FEF3C7,stroke:#FDE68A
+```
+
+For the full labeled diagram (with all pipeline stages and file paths), see the static version:
 
 ![Predictive maintenance MLOps architecture](assets/architecture.svg)
 
@@ -157,6 +205,24 @@ curl -X POST http://localhost:8000/predict \
   "model_version": "0.1.0"
 }
 ```
+
+<details>
+<summary>Request flow (sequence diagram)</summary>
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant API as FastAPI (/predict)
+    participant Model as FailureClassifier
+
+    Client->>API: POST sensor reading (JSON)
+    API->>Model: predict_proba(reading)
+    Model-->>API: failure_probability
+    API->>API: apply tuned decision_threshold
+    API-->>Client: risk_level + probability + threshold
+```
+
+</details>
 
 Score an entire fleet in one call:
 

@@ -1,0 +1,77 @@
+<svg width="1600" height="360" viewBox="0 0 1600 360" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Predictive Maintenance MLOps banner">
+  <defs>
+    <linearGradient id="bannerBg" x1="0" y1="0" x2="1600" y2="360" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0B1220"/>
+      <stop offset="0.55" stop-color="#0F2138"/>
+      <stop offset="1" stop-color="#0B3B33"/>
+    </linearGradient>
+    <linearGradient id="accentBar" x1="0" y1="0" x2="1600" y2="0" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#38BDF8"/>
+      <stop offset="0.5" stop-color="#34D399"/>
+      <stop offset="1" stop-color="#38BDF8"/>
+    </linearGradient>
+    <linearGradient id="gaugeGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#38BDF8"/>
+      <stop offset="1" stop-color="#34D399"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <style>
+      .brand { font: 800 54px 'Segoe UI', Arial, sans-serif; fill: #F8FAFC; }
+      .tag { font: 600 22px 'Segoe UI', Arial, sans-serif; fill: #A7C3D9; }
+      .chip-text { font: 700 15px 'Segoe UI', Arial, sans-serif; fill: #0B1220; }
+      .pulse { stroke: #34D399; stroke-width: 3; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+      .grid { stroke: #1E3A52; stroke-width: 1; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="360" fill="url(#bannerBg)"/>
+  <rect width="1600" height="6" fill="url(#accentBar)"/>
+
+  <!-- faint sensor grid backdrop -->
+  <g opacity="0.35">
+    <path class="grid" d="M0 300 H1600"/>
+    <path class="grid" d="M0 260 H1600"/>
+    <path class="grid" d="M0 220 H1600"/>
+  </g>
+
+  <!-- gauge / dial icon -->
+  <g transform="translate(120 180)" filter="url(#glow)">
+    <circle r="86" fill="#0F2138" stroke="#274863" stroke-width="3"/>
+    <path d="M -60 40 A 72 72 0 1 1 60 40" stroke="#1E3A52" stroke-width="10" fill="none" stroke-linecap="round"/>
+    <path d="M -60 40 A 72 72 0 0 1 18 -68" stroke="url(#gaugeGrad)" stroke-width="10" fill="none" stroke-linecap="round"/>
+    <line x1="0" y1="0" x2="34" y2="-46" stroke="#F8FAFC" stroke-width="5" stroke-linecap="round"/>
+    <circle r="9" fill="#F8FAFC"/>
+  </g>
+
+  <!-- telemetry pulse line -->
+  <polyline class="pulse" points="230,255 300,255 320,215 345,285 365,235 385,255 460,255 480,190 500,255 560,255" filter="url(#glow)"/>
+
+  <text x="270" y="115" class="brand">Predictive Maintenance MLOps</text>
+  <text x="272" y="150" class="tag">Sensor telemetry &#8594; failure risk &#8594; monitored production decisions</text>
+
+  <!-- feature chips -->
+  <g transform="translate(272 190)">
+    <rect x="0" y="0" width="118" height="34" rx="17" fill="#38BDF8"/>
+    <text x="59" y="22" text-anchor="middle" class="chip-text">Config-driven</text>
+
+    <rect x="130" y="0" width="96" height="34" rx="17" fill="#34D399"/>
+    <text x="178" y="22" text-anchor="middle" class="chip-text">FastAPI</text>
+
+    <rect x="238" y="0" width="120" height="34" rx="17" fill="#38BDF8"/>
+    <text x="298" y="22" text-anchor="middle" class="chip-text">Drift-monitored</text>
+
+    <rect x="370" y="0" width="150" height="34" rx="17" fill="#34D399"/>
+    <text x="445" y="22" text-anchor="middle" class="chip-text">Docker &amp; CI ready</text>
+
+    <rect x="532" y="0" width="118" height="34" rx="17" fill="#38BDF8"/>
+    <text x="591" y="22" text-anchor="middle" class="chip-text">SAST + SCA</text>
+  </g>
+
+  <text x="272" y="252" class="tag" font-size="17" fill="#7FA0B8">air/process temp &#183; rotational speed &#183; torque &#183; tool wear</text>
+</svg>
